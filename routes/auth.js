@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const { validate_body } = require("../validations/validation");
 
@@ -36,15 +37,18 @@ router.post("/register", validate_body, async (req, res) => {
 router.post("/login", validate_body, async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (user) {
+    console.log(`User exists!`);
     const validPassword = await bcrypt.compare(
-      user.password,
-      req.body.password
-    );
+      req.body.password,
+      user.password
+    ); // compare(bodyPassword, hashedPassword) in that argument order
 
     if (!validPassword) {
       res.send("Invalid Email or Password");
     } else {
-      res.send("Logged In!");
+      //Valid User; now sign a token for her
+      const token = jwt.sign({ her_id: user._id }, process.env.TOKEN_SECRET);
+      res.send("Logged In!\n" + token);
     }
   } else {
     res.send("Invalid Email or Password");
