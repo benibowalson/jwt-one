@@ -37,7 +37,6 @@ router.post("/register", validate_body, async (req, res) => {
 router.post("/login", validate_body, async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (user) {
-    console.log(`User exists!`);
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
